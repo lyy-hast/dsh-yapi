@@ -4,7 +4,7 @@
 
 ## 配置
 
-在 DSH 的 **插件（Plugins）** 页面找到 **@local/dsh-yapi** 这个插件包，点开它下面的 **「YAPI 连接器」** 这一行，再点 **“配置 / Configure”**，即可填写以下字段（均为即时生效，无需重启）：
+在 DSH 的 **插件（Plugins）** 页面找到 **dsh-yapi** 这个插件包，点开它下面的 **「YAPI 连接器」** 这一行，再点 **“配置 / Configure”**，即可填写以下字段（均为即时生效，无需重启）：
 
 - **Base URL**（必填）：你的 YAPI 服务地址，例如 `https://yapi.example.com`。**没有默认值，必须自己填写**；留空时所有 YAPI 操作会提示"服务地址未配置"。仅允许 https（本机 loopback 可用 http）。
 - **Allowed hosts**（可选）：额外的主机白名单。留空表示不额外限制——所有请求 URL 都只由你填写的 Base URL 构造，不接受工具参数覆盖，因此不会有 SSRF 面；如需再收紧可填入允许的主机名。

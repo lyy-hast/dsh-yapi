@@ -1,5 +1,5 @@
 /**
- * @local/dsh-yapi — Host half.
+ * dsh-yapi — Host half.
  *
  * Connects DSH to a YAPI documentation service. Secrets (YAPI password, project
  * token, login session cookie) live in `ctx.credentials`; the plugin Config only

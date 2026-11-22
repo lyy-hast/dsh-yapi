@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: '@local/dsh-yapi',
+  id: 'dsh-yapi',
   factory(require) {
     const React = require('react')
     const h = React.createElement
@@ -1062,7 +1062,7 @@ window.__ModuleLoader__.load({
         // `${package}#${rowId}` and the settings namespace is the row id.
         ctx.slots.inject('plugins.row.config', () => ctx.slots.register({
           name: 'plugins.row.config',
-          key: '@local/dsh-yapi#dsh-yapi',
+          key: 'dsh-yapi#dsh-yapi',
           locale: NS,
         }, YapiConfig))
       },

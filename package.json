@@ -1,17 +1,34 @@
 {
-  "name": "@local/dsh-yapi",
+  "name": "dsh-yapi",
   "version": "1.0.0",
-  "private": true,
+  "description": "YAPI connector for DeepSeek Harness: configure your YAPI service, select a project from the conversation, and let the agent generate interface docs that are written back only after you approve them in the review card.",
   "type": "module",
-  "description": "DSH plugin that connects to a YAPI documentation service, lists configured projects, and lets the agent generate interface docs back into a project.",
-  "dependencies": {
+  "license": "MIT",
+  "author": "dsh-yapi contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lyy-hast/dsh-yapi.git"
+  },
+  "homepage": "https://github.com/lyy-hast/dsh-yapi#readme",
+  "bugs": {
+    "url": "https://github.com/lyy-hast/dsh-yapi/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "cordis",
+    "yapi"
+  ],
+  "peerDependencies": {
     "@deepseek-ai/schemastery": "^3.18.4"
   },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
     "./locale/*.json": "./locale/*.json",
-    "./icon": "./icon.svg"
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
   },
   "files": [
     "index.js",
@@ -20,7 +37,8 @@
     "locale/*.json",
     "docs",
     "icon.svg",
-    "src"
+    "README.md",
+    "LICENSE"
   ],
   "dsh": {
     "bundle": { "patch": "./cordis.patch.yml" },
