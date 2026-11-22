@@ -35,7 +35,7 @@
     "client.js",
     "cordis.patch.yml",
     "locale/*.json",
-    "docs",
+    "docs/DETAIL.md",
     "icon.svg",
     "README.md",
     "LICENSE"
