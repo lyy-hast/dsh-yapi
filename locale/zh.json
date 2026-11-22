@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "YAPI 连接器",
+    "description": "对接 YAPI 文档服务：配置服务地址与凭据、在对话中选择项目，agent 生成接口定义后经审查卡片批准写回 YAPI。",
+    "detail": "docs/DETAIL.md"
+  },
+  "badge": {
+    "title": "已选择的 YAPI 项目"
+  }
+}

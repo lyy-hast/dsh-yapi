@@ -1,0 +1,6 @@
+- insert:
+    - id: dsh-yapi
+      name: '@local/dsh-yapi'
+      # baseUrl is intentionally NOT set here: the user must configure the
+      # YAPI service address in Plugins -> YAPI connector settings.
+      config: {}

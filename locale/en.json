@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "YAPI connector",
+    "description": "Connects to a YAPI documentation service: configure the address and credentials, select a project from the conversation, and let the agent generate interface docs that are written back only after you approve them in the review card.",
+    "detail": "docs/DETAIL.md"
+  },
+  "badge": {
+    "title": "Selected YAPI project"
+  }
+}
