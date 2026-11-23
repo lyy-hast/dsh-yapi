@@ -52,7 +52,8 @@
 - **请求体**：写入 `req_body_other`（YAPI 没有 `req_body` 字段，会被服务端丢弃），并同时携带 `req_body_type=json`、`req_body_is_json_schema=true`。
 - **响应体**：写入 `res_body`，同时携带 `res_body_type=json`、`res_body_is_json_schema=true`。
 - **JSON Schema 而非示例 JSON**：reqBody/resBody 的内容约定为 JSON Schema 字符串（schema 对象 `JSON.stringify` 的结果），带 `*_is_json_schema=true` 后 YAPI 接口页会渲染成结构化的字段树（SchemaTable）并支持高级 Mock；不带时只会显示成一段原始 JSON 文本。
-- **desc（备注）**：agent 起草 Markdown 文本；YAPI 查看页把 `desc` 当 **HTML** 渲染（与 YAPI 自带编辑器保存 `desc=getHtml()` 一致），宿主会把 Markdown 安全转换为 HTML 后写入 `desc`，同时把 Markdown 源码写入 `markdown` 字段供编辑器回显。转换先整体转义 HTML 再生成标签，备注里的原始 HTML/脚本不会注入。
+- **desc（备注）**：agent 起草 Markdown 文本；YAPI 查看页把 `desc` 当 **HTML** 渲染（与 YAPI 自带编辑器保存 `desc=getHtml()` 一致），宿主会把 Markdown 安全转换为 HTML 后写入 `desc`，同时把 Markdown 源码写入 `markdown` 字段供编辑器回显。转换先整体转义 HTML 再生成标签，备注里的原始 HTML/脚本不会注入。章节标题用 `#`/`##`/`###` 都可以，宿主在转换时把渲染级别压到 **h4 及以下**（h5/h6 保留），避免 YAPI 预览页里标题过大；`markdown` 源码保持原样。
+- **接口状态**：新增与更新都会发送 `status=done`，接口在 YAPI 中显示为**已完成**（默认是「未完成」）。状态由宿主侧固定写入，agent 不需要（也不能通过工具参数）传 `status`。
 - 更新条目未提供 reqBody/resBody/desc 时（字段为 null）不发送对应字段，保留线上原值；desc 的变更检测以 `markdown` 源码（或旧版写入的原文）为准。
 
 ## 命令
