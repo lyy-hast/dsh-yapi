@@ -411,13 +411,23 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Settings-tab wrapper for the same configuration form. The settings shell
-     * passes no owner props to a `settings.plugins.tab` entry, so this adapter
-     * subscribes to the shared ConfigForm (`ctx.configForms.get('dsh-yapi')`)
-     * and rebuilds the `ConfigPageForm` shape that {@link YapiConfig} expects.
-     * Keeping one form component for both the Plugins page and Settings means
-     * edits from either surface stay consistent through the shared form.
+     * Standalone Settings section (bottom-left avatar → Settings → YAPI
+     * connector). The settings shell passes only `close` as owner props, so
+     * this adapter subscribes to the shared ConfigForm
+     * (`ctx.configForms.get('dsh-yapi')`) and rebuilds the `ConfigPageForm`
+     * shape that {@link YapiConfig} expects. The same form also backs the
+     * Plugins-page row page, so both surfaces edit one configuration.
      */
+    const settingsSectionStyle = {
+      display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '720px',
+      paddingTop: '24px', boxSizing: 'border-box',
+      color: 'var(--dsw-alias-label-primary, inherit)', fontFamily: 'inherit',
+    }
+    const settingsTitleStyle = {
+      margin: 0, fontSize: '16px', lineHeight: '24px', fontWeight: 500,
+      color: 'var(--dsw-alias-label-primary, inherit)',
+    }
+
     function YapiSettingsTab({ form, t }) {
       const [snapshot, setSnapshot] = React.useState(() => form.getSnapshot())
       React.useEffect(() => form.subscribe(() => setSnapshot(form.getSnapshot())), [form])
@@ -425,7 +435,11 @@ window.__ModuleLoader__.load({
         state: snapshot,
         mutate: (ops, revision) => form.mutate(ops, revision),
       }), [snapshot, form])
-      return h(YapiConfig, { view: 'page', form: pageForm, t })
+      const title = (t && t('settings.title')) || 'YAPI 连接器'
+      return h('div', { style: settingsSectionStyle },
+        h('h2', { style: settingsTitleStyle }, title),
+        h(YapiConfig, { view: 'page', form: pageForm, t }),
+      )
     }
 
     const PLAN_TERTIARY = 'var(--dsw-alias-label-tertiary, inherit)'
@@ -949,7 +963,8 @@ window.__ModuleLoader__.load({
           'config.saveFailed': 'Save was refused by the host.',
           'config.saveHint': 'Only changed fields are written.',
           'config.saveReadOnly': 'This configuration is read-only in the current profile.',
-          'settings.tab': 'YAPI connector',
+          'settings.nav': 'YAPI connector',
+          'settings.title': 'YAPI connector',
         }
         const zh = {
           'badge.title': '已选择的 YAPI 项目',
@@ -1031,7 +1046,8 @@ window.__ModuleLoader__.load({
           'config.saveFailed': '保存被服务端拒绝',
           'config.saveHint': '仅提交发生变化的字段。',
           'config.saveReadOnly': '此配置在当前环境中为只读。',
-          'settings.tab': 'YAPI 连接器',
+          'settings.nav': 'YAPI 连接器',
+          'settings.title': 'YAPI 连接器',
         }
         if (ctx.locale?.register) {
           ctx.effect(() => ctx.locale.register(NS, { en, zh }), 'dsh-yapi: locale')
@@ -1087,25 +1103,25 @@ window.__ModuleLoader__.load({
           locale: NS,
         }, YapiConfig))
 
-        // EXTRA ENTRY: put the same configuration on the global Settings page
-        // under Settings → Plugins, where users look for connector setup. The
-        // shared ConfigForm (`dsh-yapi` namespace) keeps this page and the
-        // Plugins-page row page in sync. `ctx.inject(['configForms'], …)` keeps
-        // the composer badge working even if the Settings client is absent,
-        // and `whileServed` hides the tab when the Host stops serving this
-        // plugin's config namespace.
+        // A dedicated Settings section in the panel opened from the bottom-left
+        // avatar (Settings → YAPI connector), not nested inside Settings →
+        // Plugins. The shared ConfigForm (`dsh-yapi` namespace) keeps this
+        // section and the Plugins-page row page in sync. `ctx.inject(
+        // ['configForms'], …)` keeps the composer badge working when the
+        // Settings client is absent, and `whileServed` hides the section when
+        // the Host stops serving this plugin's config namespace.
         ctx.inject(['configForms'], (child) => {
           child.effect(() => child.configForms.whileServed(['dsh-yapi'], () => {
             const form = child.configForms.get('dsh-yapi')
-            return child.slots.inject('settings.plugins.tab', () => child.slots.register({
-              name: 'settings.plugins.tab',
-              id: 'dsh-yapi',
-              order: 40,
-              label: () => t('settings.tab'),
+            return child.slots.inject('settings.section', () => child.slots.register({
+              name: 'settings.section',
+              id: 'yapi',
+              order: 18,
+              label: () => t('settings.nav'),
               locale: NS,
               inject: () => ({ form }),
             }, YapiSettingsTab))
-          }), 'dsh-yapi: settings tab')
+          }), 'dsh-yapi: settings section')
         })
       },
     }
