@@ -22,10 +22,12 @@ window.__ModuleLoader__.load({
       {
         key: 'passwordRef', label: 'config.passwordRef', help: 'config.passwordRefHelp',
         kind: 'text', placeholder: 'yapi-password', group: 'credentials', mono: true,
+        sensitive: true,
       },
       {
         key: 'tokenRef', label: 'config.tokenRef', help: 'config.tokenRefHelp',
         kind: 'text', placeholder: 'yapi-project-token', group: 'credentials', mono: true,
+        sensitive: true,
       },
       {
         key: 'projects', label: 'config.projects', help: 'config.projectsHelp',
@@ -179,6 +181,48 @@ window.__ModuleLoader__.load({
       },
     }
 
+    /**
+     * Credential input whose value is desensitized by default: the raw value
+     * stays in the draft (so saving is unchanged), but it is rendered behind a
+     * password mask until the user explicitly reveals it. Used for the
+     * password, the legacy default token and every project token. Defined at
+     * module scope so re-renders of the parent never remount it (which would
+     * drop focus and reset the reveal state while typing).
+     */
+    function SecretInput({ value, onChange, disabled, placeholder, mono, fieldId, helpId, ariaLabel, required, label }) {
+      const [revealed, setRevealed] = React.useState(false)
+      const toggleText = revealed ? label('config.hideSecret', 'Hide') : label('config.showSecret', 'Show')
+      return h('div', { style: { display: 'flex', gap: '6px', alignItems: 'center', minWidth: 0 } },
+        h('input', {
+          id: fieldId,
+          type: revealed ? 'text' : 'password',
+          value,
+          placeholder,
+          disabled,
+          autoComplete: 'off',
+          spellCheck: false,
+          style: {
+            ...styles.input,
+            ...(mono ? styles.mono : null),
+            ...(disabled ? styles.controlDisabled : null),
+            flex: 1,
+            minWidth: 0,
+          },
+          'aria-label': ariaLabel,
+          'aria-required': required ? true : undefined,
+          'aria-describedby': helpId,
+          onChange: e => onChange(e.target.value),
+        }),
+        h('button', {
+          type: 'button', disabled,
+          onClick: () => setRevealed(v => !v),
+          style: { ...styles.actionBtn, flex: 'none', height: '34px' },
+          'aria-pressed': revealed,
+          'aria-label': toggleText,
+        }, toggleText),
+      )
+    }
+
     function toDraft(value) {
       const out = {}
       for (const f of FIELDS) {
@@ -306,12 +350,14 @@ window.__ModuleLoader__.load({
                     style: { ...styles.actionBtn, padding: '0 10px', color: 'var(--dsw-alias-state-error-primary, #d92d20)' },
                   }, label('config.removeProject', 'Remove')),
                 ),
-                h('input', {
-                  type: 'text', value: p.token, disabled,
+                h(SecretInput, {
+                  value: p.token,
+                  disabled,
+                  mono: true,
+                  label,
                   placeholder: label('config.projectTokenPh', 'token (raw or YAPI_PROJECT_TOKEN)'),
-                  style: { ...styles.input, ...styles.mono },
-                  'aria-label': label('config.projectToken', 'Project token'),
-                  onChange: e => updateRow(i, 'token', e.target.value),
+                  ariaLabel: label('config.projectToken', 'Project token'),
+                  onChange: text => updateRow(i, 'token', text),
                 })
               )),
               rows.length === 0
@@ -346,6 +392,29 @@ window.__ModuleLoader__.load({
             ),
           )
         }
+        const control = f.sensitive
+          ? h(SecretInput, {
+              value,
+              disabled,
+              label,
+              placeholder: f.placeholder || '',
+              mono: !!f.mono,
+              fieldId,
+              helpId,
+              required: !!f.required,
+              onChange: text => setDraft(d => ({ ...d, [f.key]: text })),
+            })
+          : h('input', {
+              id: fieldId, type: 'text', value, placeholder: f.placeholder || '', disabled,
+              style: {
+                ...styles.input,
+                ...(f.mono ? styles.mono : null),
+                ...(disabled ? styles.controlDisabled : null),
+              },
+              'aria-required': f.required ? true : undefined,
+              'aria-describedby': helpId,
+              onChange: e => setDraft(d => ({ ...d, [f.key]: e.target.value })),
+            })
         return h('div', { key: f.key, style: styles.field },
           h('label', { htmlFor: fieldId, style: styles.label },
             label(f.label, f.key),
@@ -353,17 +422,7 @@ window.__ModuleLoader__.load({
               ? h('span', { 'aria-hidden': true, style: styles.required }, '*')
               : h('span', { style: styles.optional }, label('config.optional', 'Optional')),
           ),
-          h('input', {
-            id: fieldId, type: 'text', value, placeholder: f.placeholder || '', disabled,
-            style: {
-              ...styles.input,
-              ...(f.mono ? styles.mono : null),
-              ...(disabled ? styles.controlDisabled : null),
-            },
-            'aria-required': f.required ? true : undefined,
-            'aria-describedby': helpId,
-            onChange: e => setDraft(d => ({ ...d, [f.key]: e.target.value })),
-          }),
+          control,
           h('p', { id: helpId, style: styles.help }, label(f.help, '')),
         )
       }
@@ -926,6 +985,8 @@ window.__ModuleLoader__.load({
           'config.intro': 'Set up the YAPI connection and how DSH writes to it.',
           'config.requiredHint': 'required',
           'config.optional': 'Optional',
+          'config.showSecret': 'Show',
+          'config.hideSecret': 'Hide',
           'config.group.service': 'Service address',
           'config.group.serviceHint': 'Where the connector reaches YAPI and which hosts it may call.',
           'config.group.projects': 'Projects',
@@ -1009,6 +1070,8 @@ window.__ModuleLoader__.load({
           'config.intro': '设置 YAPI 连接地址以及 DSH 写入 YAPI 的方式。',
           'config.requiredHint': '为必填项',
           'config.optional': '可选',
+          'config.showSecret': '显示',
+          'config.hideSecret': '隐藏',
           'config.group.service': '服务地址',
           'config.group.serviceHint': '连接器访问 YAPI 的地址，以及允许访问的主机。',
           'config.group.projects': '项目列表',
