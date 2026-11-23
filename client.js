@@ -410,6 +410,24 @@ window.__ModuleLoader__.load({
       )
     }
 
+    /**
+     * Settings-tab wrapper for the same configuration form. The settings shell
+     * passes no owner props to a `settings.plugins.tab` entry, so this adapter
+     * subscribes to the shared ConfigForm (`ctx.configForms.get('dsh-yapi')`)
+     * and rebuilds the `ConfigPageForm` shape that {@link YapiConfig} expects.
+     * Keeping one form component for both the Plugins page and Settings means
+     * edits from either surface stay consistent through the shared form.
+     */
+    function YapiSettingsTab({ form, t }) {
+      const [snapshot, setSnapshot] = React.useState(() => form.getSnapshot())
+      React.useEffect(() => form.subscribe(() => setSnapshot(form.getSnapshot())), [form])
+      const pageForm = React.useMemo(() => ({
+        state: snapshot,
+        mutate: (ops, revision) => form.mutate(ops, revision),
+      }), [snapshot, form])
+      return h(YapiConfig, { view: 'page', form: pageForm, t })
+    }
+
     const PLAN_TERTIARY = 'var(--dsw-alias-label-tertiary, inherit)'
     const PLAN_SUCCESS = 'var(--dsw-alias-state-success-primary, #12805c)'
     const PLAN_WARN = 'var(--dsw-alias-state-warn-primary, #d97706)'
@@ -850,6 +868,7 @@ window.__ModuleLoader__.load({
       inject: ['slots', 'locale', 'remote', 'remote.commands'],
       apply(ctx) {
         const NS = 'dshYapi'
+        const t = ctx.locale.bind(NS)
         const en = {
           'badge.title': 'Selected YAPI project',
           'badge.select': 'Select YAPI project',
@@ -930,6 +949,7 @@ window.__ModuleLoader__.load({
           'config.saveFailed': 'Save was refused by the host.',
           'config.saveHint': 'Only changed fields are written.',
           'config.saveReadOnly': 'This configuration is read-only in the current profile.',
+          'settings.tab': 'YAPI connector',
         }
         const zh = {
           'badge.title': '已选择的 YAPI 项目',
@@ -1011,6 +1031,7 @@ window.__ModuleLoader__.load({
           'config.saveFailed': '保存被服务端拒绝',
           'config.saveHint': '仅提交发生变化的字段。',
           'config.saveReadOnly': '此配置在当前环境中为只读。',
+          'settings.tab': 'YAPI 连接器',
         }
         if (ctx.locale?.register) {
           ctx.effect(() => ctx.locale.register(NS, { en, zh }), 'dsh-yapi: locale')
@@ -1065,6 +1086,27 @@ window.__ModuleLoader__.load({
           key: 'dsh-yapi#dsh-yapi',
           locale: NS,
         }, YapiConfig))
+
+        // EXTRA ENTRY: put the same configuration on the global Settings page
+        // under Settings → Plugins, where users look for connector setup. The
+        // shared ConfigForm (`dsh-yapi` namespace) keeps this page and the
+        // Plugins-page row page in sync. `ctx.inject(['configForms'], …)` keeps
+        // the composer badge working even if the Settings client is absent,
+        // and `whileServed` hides the tab when the Host stops serving this
+        // plugin's config namespace.
+        ctx.inject(['configForms'], (child) => {
+          child.effect(() => child.configForms.whileServed(['dsh-yapi'], () => {
+            const form = child.configForms.get('dsh-yapi')
+            return child.slots.inject('settings.plugins.tab', () => child.slots.register({
+              name: 'settings.plugins.tab',
+              id: 'dsh-yapi',
+              order: 40,
+              label: () => t('settings.tab'),
+              locale: NS,
+              inject: () => ({ form }),
+            }, YapiSettingsTab))
+          }), 'dsh-yapi: settings tab')
+        })
       },
     }
   },
