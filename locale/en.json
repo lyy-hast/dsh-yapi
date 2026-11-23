@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "YAPI connector",
-    "description": "Connects to a YAPI documentation service: configure the address and credentials, select a project from the conversation, and let the agent generate interface docs that are written back only after you approve them in the review card.",
+    "description": "Connect DeepSeek Harness to a YAPI service: generate documentation automatically through agent conversation, then sync the approved changes back to the remote YAPI documentation service.",
     "detail": "docs/DETAIL.md"
   },
   "badge": {

@@ -1,6 +1,6 @@
 # YAPI 连接器
 
-把 DeepSeek Harness 对接到你们的 YAPI 文档服务。配置服务地址和凭据后，可以在对话里选择项目，并用 `/yapi-doc` 技能让 agent 基于你的口述生成接口定义、经**审查卡片批准**后写回 YAPI。
+为 DeepSeek Harness 提供连接 YAPI 服务的能力：通过 agent 对话实现自动生成文档，审批后自动更新至远程 YAPI 文档服务内。配置服务地址和凭据后，可以在对话里选择项目，并用 `/yapi-doc` 技能让 agent 基于你的口述生成接口定义、经**审查卡片批准**后写回 YAPI。
 
 ## 配置
 

@@ -1,7 +1,7 @@
 {
   "name": "dsh-yapi",
   "version": "1.0.0",
-  "description": "YAPI connector for DeepSeek Harness: configure your YAPI service, select a project from the conversation, and let the agent generate interface docs that are written back only after you approve them in the review card.",
+  "description": "Connect DeepSeek Harness to a YAPI service: generate interface documentation automatically through agent conversation, then sync the approved changes back to the remote YAPI documentation service.",
   "type": "module",
   "license": "MIT",
   "author": "dsh-yapi contributors",
