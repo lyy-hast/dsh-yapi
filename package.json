@@ -1,6 +1,6 @@
 {
   "name": "dsh-yapi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Connect DeepSeek Harness to a YAPI service: generate interface documentation automatically through agent conversation, then sync the approved changes back to the remote YAPI documentation service.",
   "type": "module",
   "license": "MIT",
