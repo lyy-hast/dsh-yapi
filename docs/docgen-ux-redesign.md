@@ -3,6 +3,8 @@
 > **状态：P1–P3 已实现**（机制级确认、审查卡片、逐条进度与失败重试）；P4（转录区卡片、
 > 卡片上选分类）为后续可选项。实现见 `index.js` / `client.js`，用户文档见 `docs/DETAIL.md`。
 >
+> **2026-11 追加（按类注释分文件夹）**：接口文档不再平铺在项目根目录。`yapi-doc` 技能要求 agent 从每个接口对应类的 Javadoc 首行提取文件夹名填入 `category`；宿主在 `annotatePlan` 按名称（忽略大小写/空白）匹配已有分类、未命中标记 `newCategory`，在 `yapi_save_interfaces` 写接口前先建文件夹（重名复用、失败逐条上报）再回填 `catid`。审查卡片按文件夹分组并标注「将新建」，结果态列出新建/复用文件夹；未提供 `category`/`catid` 时回落到默认/根分类。详见 `docs/DETAIL.md`。
+>
 > **2026-11 修订（投影重建）**：初版通过 `session.append('yapi/…')` 推送自定义事件，违反
 > 宿主约束（未知非 ignorable 事件会让会话日志拒绝加载）。现已改为 projection 投影
 > `stateVersion: 4`，只折叠标准事件（`tool/call`+`tool/result`、`command/run`+`command/done`），

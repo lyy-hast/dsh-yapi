@@ -702,6 +702,20 @@ window.__ModuleLoader__.load({
       const warnStyle = { fontSize: '11px', lineHeight: '16px', color: PLAN_WARN }
       const okStyle = { fontSize: '11px', lineHeight: '16px', color: PLAN_SUCCESS }
       const errorLineStyle = { fontSize: '11px', lineHeight: '16px', color: PLAN_ERROR }
+      const folderHeaderStyle = {
+        display: 'flex', alignItems: 'center', gap: '6px', padding: '3px 2px',
+        fontSize: '12px', fontWeight: 500, color: 'var(--dsw-alias-label-secondary, inherit)',
+      }
+      const folderNameStyle = {
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }
+      const newFolderBadgeStyle = {
+        flex: 'none', padding: '0 6px', borderRadius: '999px', fontSize: '10px', lineHeight: '16px',
+        color: PLAN_WARN, border: '0.5px solid currentColor', whiteSpace: 'nowrap',
+      }
+      const folderCountStyle = {
+        flex: 'none', marginLeft: 'auto', fontSize: '11px', color: PLAN_TERTIARY,
+      }
       const preStyle = {
         margin: 0, padding: '6px 8px', maxHeight: '120px', overflow: 'auto',
         borderRadius: '6px',
@@ -715,6 +729,27 @@ window.__ModuleLoader__.load({
         borderRadius: 'var(--dsw-radius-sm, 8px)',
         border: '0.5px solid var(--dsw-alias-border-l2, rgba(127,127,127,0.25))',
         background: 'var(--dsw-alias-interactive-bg-hover, rgba(127,127,127,0.05))',
+      }
+
+      /** Group plan items by their folder (category) name, preserving first-seen
+       * order. Items without a folder are grouped under the empty-name group and
+       * rendered with a "default folder" label; new folders are flagged so the
+       * header can show a "will create" badge. */
+      const groupByFolder = () => {
+        const groups = []
+        const byName = new Map()
+        for (const it of planItems) {
+          const name = it.category || ''
+          let g = byName.get(name)
+          if (!g) {
+            g = { name, items: [], newFolder: false }
+            byName.set(name, g)
+            groups.push(g)
+          }
+          g.items.push(it)
+          if (it.newCategory) g.newFolder = true
+        }
+        return groups
       }
 
       const renderPlanItem = (it) => {
@@ -820,8 +855,30 @@ window.__ModuleLoader__.load({
           ),
           phase === 'cancelled' || phase === 'expired'
             ? h('div', { style: hintStyle }, fmt(`plan.phase.${phase}`, phase))
-            : h('div', { style: { display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '260px', overflow: 'auto' } },
-                planItems.map(renderPlanItem)),
+            : h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '260px', overflow: 'auto' } },
+                groupByFolder().map((g, gi) => h('div', {
+                  key: `folder-${gi}-${g.name}`,
+                  style: { display: 'flex', flexDirection: 'column', gap: '4px' },
+                },
+                  h('div', { style: folderHeaderStyle },
+                    h('span', { 'aria-hidden': true }, '📁'),
+                    h('span', { style: folderNameStyle, title: g.name || fmt('plan.folder.default', '默认分类') },
+                      g.name || fmt('plan.folder.default', '默认分类')),
+                    g.newFolder && (phase === 'pending' || phase === 'approved')
+                      ? h('span', { style: newFolderBadgeStyle }, fmt('plan.folder.willCreate', '将新建'))
+                      : null,
+                    h('span', { style: folderCountStyle }, fmt('plan.folder.count', '{n} 条', { n: g.items.length })),
+                  ),
+                  h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '10px' } },
+                    g.items.map(renderPlanItem)),
+                )),
+              ),
+          (phase === 'done' || phase === 'approved') && Array.isArray(plan.result?.folders) && plan.result.folders.length > 0
+            ? h('div', { style: okStyle },
+                fmt('plan.folder.created', '已创建文件夹：{names}', {
+                  names: plan.result.folders.map(f => `${f.name}${f.created ? '' : '（已存在）'}`).join('、'),
+                }))
+            : null,
           summary ? h('div', { style: hintStyle }, summary) : null,
           reviewing
             ? h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
@@ -975,6 +1032,10 @@ window.__ModuleLoader__.load({
           'plan.collapse': 'collapse',
           'plan.checked': '{checked}/{total} selected',
           'plan.expiresHint': 'valid for 15 min',
+          'plan.folder.default': 'Default folder',
+          'plan.folder.willCreate': 'new folder',
+          'plan.folder.count': '{n} items',
+          'plan.folder.created': 'Folders created: {names}',
           'plan.selectTitle': 'Projects',
           'plan.notesLabel': 'Requirement',
           'plan.notesPh': 'Describe the interfaces to generate, e.g. add login and register…',
@@ -1060,6 +1121,10 @@ window.__ModuleLoader__.load({
           'plan.collapse': '收起',
           'plan.checked': '{checked}/{total} 已勾选',
           'plan.expiresHint': '15 分钟内有效',
+          'plan.folder.default': '默认分类',
+          'plan.folder.willCreate': '将新建',
+          'plan.folder.count': '{n} 条',
+          'plan.folder.created': '已创建文件夹：{names}',
           'plan.selectTitle': '项目',
           'plan.notesLabel': '生成需求',
           'plan.notesPh': '描述要生成的接口需求，如：补充登录和注册接口…',
